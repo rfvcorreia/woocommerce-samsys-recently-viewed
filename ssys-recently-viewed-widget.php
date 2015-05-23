@@ -47,9 +47,10 @@ class Ssys_WC_Recently_Viewed extends WP_Widget {
 	public function widget( $args, $instance ) {
 		global $woocommerce;
 		
+
 		$title = apply_filters( 'widget_title', $instance['title'] );
 
-		echo $args['before_widget'];
+		echo '<aside>';
 		//Print Title if defined
 		if ( ! empty( $title ) )
 			echo $args['before_title'] . $title . $args['after_title'];
@@ -71,8 +72,9 @@ class Ssys_WC_Recently_Viewed extends WP_Widget {
 		if($recent_query->have_posts()) :
 		
 			while ($recent_query->have_posts()) : $recent_query->the_post();
-			
+				
 				global $product;
+
 				
 				if($instance['force_including_tax']){
 						
@@ -86,7 +88,7 @@ class Ssys_WC_Recently_Viewed extends WP_Widget {
 				
 				echo '<li>
 					<a href="' . get_permalink() . '">
-						' . ( has_post_thumbnail() ? get_the_post_thumbnail( $post->ID, 'shop_thumbnail' ) : woocommerce_placeholder_img( 'shop_thumbnail' ) ) . ' ' . get_the_title() . '
+						' . ( has_post_thumbnail() ? get_the_post_thumbnail( $product->id, 'shop_thumbnail' ) : woocommerce_placeholder_img( 'shop_thumbnail' ) ) . ' ' . get_the_title() . '
 					</a> ' . $price . '
 				</li>';
 			
@@ -95,10 +97,9 @@ class Ssys_WC_Recently_Viewed extends WP_Widget {
 			
 		endif;
 		
-		echo '</ul>';
-		
-		echo $args['after_widget'];
-		
+		echo '</ul>
+		</aside>';
+	
 	}
 
 	/**
