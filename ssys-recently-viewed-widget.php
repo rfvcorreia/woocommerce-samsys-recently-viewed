@@ -1,4 +1,8 @@
 <?php 
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Creates Samsys Catalog widgets.
  *
@@ -8,163 +12,125 @@
  * @author    Ricardo Correia, Samsys <ricardo.correia@samsys.pt>
  * @license   GPL-2.0+
  * @link      http://samsys.pt
- * @copyright 2013 Samsys - Consultoria e Soluções Informáticas, Lda.
+ * @copyright 2015 Samsys - Consultoria e Soluções Informáticas, Lda.
  */
-function register_ssys_WC_recently_viewed_widget() {
-    register_widget( 'Ssys_WC_Recently_Viewed' );
-}
-add_action( 'widgets_init', 'register_ssys_WC_recently_viewed_widget' );
+
+add_action( 'widgets_init', 'register_ssys_WC_recently_viewed_widget', 15 );
 
 /**
  * Initializes featured posts widget.
  *
  * @see WP_Widget::widget()
  * 
- * @since   1.0.0
+ * @since   2.0.0
  */
-class Ssys_WC_Recently_Viewed extends WP_Widget {
+function register_ssys_WC_recently_viewed_widget() {
 
-	/**
-	 * Register widget with WordPress.
-	 */
-	function __construct() {
-		
-		parent::__construct(
-			'Ssys_WC_Recently_Viewed', // Base ID
-			__('WooCommerce Recently Viewed Products from all visitors by Samsys' , 'samsys-WC-recently-viewed'), // Name
-			array( 'description' => __( 'Adds a widget with the recently viewed products from all website visitors. ' , 'Ssys_WC_Recently_Viewed' ), ) // Args
-		);
-	}
+	class Ssys_WC_Recently_Viewed extends WC_Widget {
 
-	/**
-	 * Front-end display of widget.
-	 *
-	 * @see WP_Widget::widget()
-	 *
-	 * @param array $args     Widget arguments.
-	 * @param array $instance Saved values from database.
-	 */
-	public function widget( $args, $instance ) {
-		global $woocommerce;
-		
-		$title = apply_filters( 'widget_title', $instance['title'] );
-
-		echo $args['before_widget'];
-		//Print Title if defined
-		if ( ! empty( $title ) )
-			echo $args['before_title'] . $title . $args['after_title'];
-		
-		//Get Recently Viewed Products
-		$args = array(
-				   'post_type' => 'product',
-				   'post_status' => array( 'publish' ),
-				   'posts_per_page' => $instance['num_prod'],
-				   'orderby' => 'meta_value_num',
-    			   'order' => 'DESC',
-    			   'meta_key' => '_ssys_Last_Viewed_Date'
-				);
-				
-		$recent_query = new WP_Query($args);
-		
-		echo '<ul class="product_list_widget">';
-		
-		if($recent_query->have_posts()) :
-		
-			while ($recent_query->have_posts()) : $recent_query->the_post();
+		/**
+		 * Constructor
+		 */
+		function __construct() {
 			
-				global $product;
+			$this->widget_cssclass    = 'woocommerce widget_recently_viewed_products ssys_all_visitors';
+			$this->widget_description = __( 'Display a list of recently viewed products from all visitors.', 'woocommerce-ssys-recently-viewed' );
+			$this->widget_id          = 'woocommerce-ssys-recently-viewed';
+			$this->widget_name        = __( 'WooCommerce Recently Viewed Products from all visitors', 'woocommerce-ssys-recently-viewed' );
+
+			$this->settings           = array(
+				'title'  => array(
+					'type'  => 'text',
+					'std'   => __( 'Recently Viewed Products', 'woocommerce' ),
+					'label' => __( 'Title', 'woocommerce' )
+				),
+				'number' => array(
+					'type'  => 'number',
+					'step'  => 1,
+					'min'   => 1,
+					'max'   => '',
+					'std'   => 4,
+					'label' => __( 'Number of products to show', 'woocommerce' )
+				),
+				'fromadmin' => array(
+					'type'  => 'checkbox',
+					'std'   => '',
+					'label' => __( 'Exclude views from administrators and shop managers', 'woocommerce' )
+				)
+			);
+
+			parent::__construct();
+
+		}
+
+		/**
+		 * Front-end display of widget.
+		 *
+		 * @see WP_Widget::widget()
+		 *
+		 * @param array $args     Widget arguments.
+		 * @param array $instance Saved values from database.
+		 */
+		public function widget( $args, $instance ) {
+			
+			$number = ! empty( $instance['number'] ) ? absint( $instance['number'] ) : $this->settings['number']['std'];
+
+			//Get Recently Viewed Products
+			$recent_args = array(
+					   'post_type' => 'product',
+					   'post_status' => array( 'publish' ),
+					   'posts_per_page' => $number,
+					   'orderby' => 'meta_value_num',
+	    			   'order' => 'DESC',
+	    			   'meta_key' => '_ssys_Last_Viewed_Date'
+					);
+
+			//Verify stock status
+			$recent_args['meta_query']   = array();
+		    $recent_args['meta_query'][] = WC()->query->stock_status_meta_query();
+		    $recent_args['meta_query']   = array_filter( $recent_args['meta_query'] );
+					
+			$recent_query = new WP_Query($recent_args);
+			
+			echo '<ul class="product_list_widget">';
+			
+			if($recent_query->have_posts()){
 				
-				if($instance['force_including_tax']){
-						
-					$price = woocommerce_price($product->get_price_including_tax()); 
+				$this->widget_start( $args, $instance );
+
+				echo '<ul class="product_list_widget ssys_recently_viewed">';
+
+				while ($recent_query->have_posts()){ 
+
+					$recent_query->the_post();
+					
+					$located = wc_locate_template('ssys-content-widget-product.php');
+
+					//Load Widget template if exists, else load WC default recently viewed widget template
+					if( file_exists($located)){
 				
-				}else{
+						wc_get_template( 'ssys-content-widget-product.php' );
 				
-					$price = $product->get_price_html(); 
+					}else{
+				
+						wc_get_template( 'content-widget-product.php' );
+				
+					}
 				
 				}
 				
-				echo '<li>
-					<a href="' . get_permalink() . '">
-						' . ( has_post_thumbnail() ? get_the_post_thumbnail( $post->ID, 'shop_thumbnail' ) : woocommerce_placeholder_img( 'shop_thumbnail' ) ) . ' ' . get_the_title() . '
-					</a> ' . $price . '
-				</li>';
-			
-			endwhile; 
+				echo '</ul>';
+
+				$this->widget_end( $args );
+				
+			}
+
 			wp_reset_postdata();
 			
-		endif;
-		
-		echo '</ul>';
-		
-		echo $args['after_widget'];
-		
-	}
+		}
 
-	/**
-	 * Back-end widget form.
-	 *
-	 * @see WP_Widget::form()
-	 *
-	 * @param array $instance Previously saved values from database.
-	 */
-	public function form( $instance ) {
-		if ( isset( $instance[ 'title' ] ) ) {
-			$title = esc_attr($instance[ 'title' ]);
-		}
-		else {
-			$title = __( 'New title', 'Ssys_WC_Recently_Viewed' );
-		}
-		
-		if ( isset( $instance[ 'num_prod' ] ) ) {
-			$num_prod = esc_attr($instance[ 'num_prod' ]);
-		}
-		else {
-			$num_prod = __( '4', 'Ssys_WC_Recently_Viewed' );
-		}
-		
-		if ( isset( $instance[ 'force_including_tax' ] ) ) {
-			$force_including_tax = esc_attr($instance[ 'force_including_tax' ]);
-		}
-		else {
-			$force_including_tax = '';
-		}
-		
-		?>
-		<p>
-		<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:','Ssys_WC_Recently_Viewed' ); ?></label> 
-		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p>
-		
-		<p>
-		<label for="<?php echo $this->get_field_id( 'num_prod' ); ?>"><?php _e( 'Number of products to display:','Ssys_WC_Recently_Viewed' ); ?></label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'num_prod' ); ?>" name="<?php echo $this->get_field_name( 'num_prod' ); ?>" type="text" value="<?php echo esc_attr( $num_prod ); ?>" />
-		</p>
-		
-		<p>
-		<input id="<?php echo $this->get_field_id( 'force_including_tax' ); ?>" name="<?php echo $this->get_field_name( 'force_including_tax' ); ?>" type="checkbox" value="1" <?php checked( '1', $force_including_tax ); ?> />
-		<label for="<?php echo $this->get_field_id( 'force_including_tax' ); ?>"><?php _e( 'Force Prices Including Tax','Ssys_WC_Recently_Viewed' ); ?></label>
-		</p>
-		
-		<?php 
-	}
+	} // class Ssys_WC_Recently_Viewed
 
-	/**
-	 * Sanitize widget form values as they are saved.
-	 *
-	 * @see WP_Widget::update()
-	 *
-	 * @param array $new_instance Values just sent to be saved.
-	 * @param array $old_instance Previously saved values from database.
-	 *
-	 * @return array Updated safe values to be saved.
-	 */
-	public function update( $new_instance, $old_instance ) {
-		$instance = array();
-		$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
-		$instance['num_prod'] = ( ! empty( $new_instance['num_prod'] ) ) ? strip_tags( $new_instance['num_prod'] ) : '';
-		$instance['force_including_tax'] = ( ! empty( $new_instance['force_including_tax'] ) ) ? strip_tags( $new_instance['force_including_tax'] ) : '';
-		
-		return $instance;
-	}
-
-} // class Ssys_WC_Recently_Viewed
+	register_widget( 'Ssys_WC_Recently_Viewed' );
+   
+}

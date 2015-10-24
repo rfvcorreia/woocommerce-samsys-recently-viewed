@@ -6,16 +6,16 @@
  * @author    Ricardo Correia, Samsys <ricardo.correia@samsys.pt>
  * @license   GPL-2.0+
  * @link      http://samsys.pt
- * @copyright 2013 Samsys - Consultoria e Soluções Informáticas, Lda.
+ * @copyright 2015 Samsys - Consultoria e Soluções Informáticas, Lda.
  *
  * @wordpress-plugin
  * Plugin Name:       WooCommerce Recently Viewed Products from all visitors by Samsys
  * Plugin URI:        http://samsys.pt
  * Description:       Displays recently viewed products from all website visitors in a widget
- * Version:           1.0.0
+ * Version:           2.0.0
  * Author:            Ricardo Correia, Samsys
  * Author URI:        http://profiles.wordpress.org/ricardocorreia
- * Text Domain:       samsys-WC-recently-viewed
+ * Text Domain:       woocommerce-ssys-recently-viewed
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Domain Path:       /languages
@@ -58,7 +58,7 @@ function Ssys_WC_recently_viewed_load_plugin_textdomain() {
 }
 
 /**
- * Initialize Hidden Custom Field And Save This Product Last Viewed Date, Hooks to 
+ * Initialize Hidden Custom Field And Save This Product Last Viewed Date, Hooks to woocommerce_before_single_product
  *
  * @since     1.0.0
  */
