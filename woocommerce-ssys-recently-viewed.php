@@ -63,9 +63,25 @@ function Ssys_WC_recently_viewed_load_plugin_textdomain() {
  * @since     1.0.0
  */
 function ssys_Generate_CF_save_visits(){
-	global $post;
 	
-	update_post_meta($post->ID, '_ssys_Last_Viewed_Date', date('U') );
+	global $post, $current_user;
+	
+	$fromadmin = 0;
+	$Ssys_WC = new Ssys_WC_Recently_Viewed();
+ 	$widgets_settings = $Ssys_WC->get_settings();
+ 	
+ 	foreach ($widgets_settings as $widget_setting) {
+ 		
+ 		if( $widget_setting['fromadmin'] == 1 )
+ 			$fromadmin = 1;
+
+ 	}
+
+ 	if($fromadmin == 0)
+		update_post_meta($post->ID, '_ssys_Last_Viewed_Date', date('U') );
+
+	if($fromadmin == 1 && !current_user_can('manage_woocommerce'))
+		update_post_meta($post->ID, '_ssys_Last_Viewed_Date', date('U') );
 	
 }
 
