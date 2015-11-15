@@ -1,10 +1,10 @@
 === WooCommerce Recently Viewed Products from all visitors by Samsys ===
-Contributors: samsys, ricardocorreia
-Donate link: http://example.com/
-Tags: woocommerce, recently viewed, all visitors
+Contributors: ricardocorreia, samsys
+Donate link: http://samsys.pt/
+Tags: woocommerce, recently viewed, all visitors, widget
 Requires at least: 3.5.1
-Tested up to: 3.8
-Stable tag: 1.0.0
+Tested up to: 4.3.1
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,10 +15,6 @@ Adds a widget with WooCommerce recently viewed products from all website visitor
 This plugin allows you to add a new widget to your sidebar in WooCommerce powered websites showing the recently viewed products from all visitors.
 
 == Installation ==
-
-This section describes how to install the plugin and get it working.
-
-e.g.
 
 = Using The WordPress Dashboard =
 
@@ -51,17 +47,23 @@ Each time a visitor accessess a product single page the date of the access is re
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+1. Widget panel and options
+2. Front-end widget using default WooCommerce Recently Viewed Products template
 
 == Changelog ==
+
+= 2.0 =
+* Plugin extends WC Widget instead of WP widget 
+* Plugin uses WooCommerce Recently Viewed Products widget template (if no dedicated template is created)
+* Option to exclude views from administrators and shop managers
+* Correction of php notices and usage of deprecated functions
 
 = 1.0 =
 * Initial plugin version
 
 == Upgrade Notice ==
+
+= 2.0 =
+Plugin extends WC Widget instead of WP widget, Plugin uses WooCommerce Recently Viewed Products widget template (if no dedicated template is created), Option to exclude views from administrators and shop managers, Correction of php notices and usage of deprecated functions
 
 = 1.0 =
